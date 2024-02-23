@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 library(smcryptoR)
 ```
 
-The goal of smcryptoR is to use national cryptographic algorithms in R. smcryptoR uses rust FFI bindings for [smcrypto crate](https://crates.io/crates/smcrypto).
+The goal of smcryptoR is to use  China's Standards of Encryption Algorithms(SM) in R. smcryptoR uses rust FFI(Foreign Function Interface) bindings for [rust crate](https://github.com/zhuobie/smcrypto).
 
 **SM3**: message digest
 
