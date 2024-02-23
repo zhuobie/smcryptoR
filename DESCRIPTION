@@ -4,11 +4,11 @@ Title: ShangMi(SM) Cryptographic Algorithms(SM2/SM3/SM4)
 Version: 0.1.0
 Authors@R: person("Meng", "Yu", role = c("aut", "cre"), email = "610074@gmail.com",
     comment = c(ORCID = "0009-0005-9794-5522"))
-Description: Shangmi(SM) Rust FFI bindings <https://github.com/zhuobie/smcrypto> for R, 
-    which contains SM3 message digest algorithm, SM2 asymmetric encryption algorithm, 
-    and SM4 symmetric encryption algorithm. Users can perform SM3 message digest, 
-    SM2 encryption/decryption, signing/verification, and key exchange, as well 
-    as SM4 encryption/decryption supporting both ECB mode and CBC mode.
+Description: Bindings to 'smcrypto' <https://github.com/zhuobie/smcrypto>: a 'Rust'
+    implementation of China's Standards of Encryption Algorithms, which is usually 
+    called 'ShangMi(SM)' algorithms. It contains 'SM3' message digest algorithm, 
+    'SM2' asymmetric encryption algorithm and 'SM4' symmetric encryption algorithm. 
+    Users can do message hash, encrypt/decrypt, sign/verify, key exchange and more.
 License: MIT + file LICENSE
 URL: https://github.com/zhuobie/smcryptoR
 BugReports: https://github.com/zhuobie/smcryptoR/issues
