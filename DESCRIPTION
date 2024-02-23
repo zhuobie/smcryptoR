@@ -1,7 +1,7 @@
 Package: smcryptoR
 Type: Package
 Title: ShangMi(SM) Cryptographic Algorithms(SM2/SM3/SM4)
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Meng", "Yu", role = c("aut", "cre"), email = "610074@gmail.com",
     comment = c(ORCID = "0009-0005-9794-5522"))
 Description: Bindings to 'smcrypto' <https://github.com/zhuobie/smcrypto>: a 'Rust'
