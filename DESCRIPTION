@@ -1,0 +1,26 @@
+Package: smcryptoR
+Type: Package
+Title: ShangMi(SM) Cryptographic Algorithms(SM2/SM3/SM4)
+Version: 0.1.0
+Authors@R: person("Meng", "Yu", role = c("aut", "cre"), email = "610074@gmail.com",
+    comment = c(ORCID = "0009-0005-9794-5522"))
+Description: Shangmi(SM) Rust FFI bindings <https://github.com/zhuobie/smcrypto> for R, 
+    which contains SM3 message digest algorithm, SM2 asymmetric encryption algorithm, 
+    and SM4 symmetric encryption algorithm. Users can perform SM3 message digest, 
+    SM2 encryption/decryption, signing/verification, and key exchange, as well 
+    as SM4 encryption/decryption supporting both ECB mode and CBC mode.
+License: MIT + file LICENSE
+URL: https://github.com/zhuobie/smcryptoR
+BugReports: https://github.com/zhuobie/smcryptoR/issues
+SystemRequirements: Cargo (Rust's package manager), rustc
+Biarch: true
+RoxygenNote: 7.2.3
+NeedsCompilation: yes
+Packaged: 2023-11-20 12:47:21 UTC; Meng
+Maintainer: Meng Yu <610074@gmail.com>
+Repository: CRAN
+Date/Publication: 2024-02-14 00:00:00 UTC
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
