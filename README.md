@@ -10,6 +10,14 @@ The goal of smcryptoR is to use national cryptographic algorithms in R. smcrypto
 
 ## Installation in R
 
+Install from CRAN:
+
+```{r}
+install.packages('smcryptoR')
+```
+
+or install from source:
+
 ```{r}
 remotes::install_github('zhuobie/smcryptoR')
 ```
