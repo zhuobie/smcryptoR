@@ -264,8 +264,7 @@ fn kg(k: BigUint, point: &str) -> Point {
 
 /// Check whether the private key is legal.
 pub fn privkey_valid(private_key: &str) -> bool {
-    let re = regex::Regex::new(r"^[0-9a-fA-F]{64}$").unwrap();
-    re.is_match(private_key)
+    hex_valid(private_key) && private_key.len() == 64
 }
 
 /// Check whether the public key is legal. The input public key may or may not contain the "04" prefix.
@@ -279,8 +278,7 @@ pub fn pubkey_valid(public_key: &str) -> bool {
         return false;
     }
     let public_key = pubkey_trim(public_key);
-    let re = regex::Regex::new(r"^[0-9a-fA-F]{128}$").unwrap();
-    if !re.is_match(&public_key) {
+    if !hex_valid(&public_key) {
         return false;
     }
     let x: &str = &public_key[0..64];
@@ -297,8 +295,15 @@ pub fn pubkey_valid(public_key: &str) -> bool {
 
 /// Check whether a hex string is legal.
 pub fn hex_valid(input: &str) -> bool {
-    let re = regex::Regex::new(r"^[0-9a-fA-F]+$").unwrap();
-    re.is_match(input)
+    let hex_chars: Vec<char> = vec![
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'a', 'b', 'c', 'd', 'e', 'f',
+        'A', 'B', 'C', 'D', 'E', 'F'
+    ];
+    let input_chars: Vec<char> = input.chars().collect();
+    let is_even = input_chars.len() % 2 == 0;
+    let all_in_hex = input_chars.iter().map(|x| hex_chars.contains(&x)).into_iter().all(|x| x);
+    is_even && all_in_hex
 }
 
 /// Check whether a base64 string is legal.
