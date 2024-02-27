@@ -161,7 +161,7 @@ SEXP sign_wrapper(SEXP id, SEXP data, SEXP private_key) {
   unsigned char* sign_data = sign(id_raw, XLENGTH(id), data_raw, XLENGTH(data), private_key_c, &sig_len);
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, sig_len));
   memcpy(RAW(result), sign_data, sig_len);
-  free_char_array((char*)sign_data);
+  free_byte_array(sign_data, sig_len);
   UNPROTECT(1);
   return result;
 }
@@ -382,7 +382,7 @@ SEXP encrypt_wrapper(SEXP data, SEXP public_key) {
   unsigned char* encrypt_data = encrypt(data_raw, XLENGTH(data), public_key_c, &enc_len);
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, enc_len));
   memcpy(RAW(result), encrypt_data, enc_len);
-  free_char_array((char*)encrypt_data);
+  free_byte_array(encrypt_data, enc_len);
   UNPROTECT(1);
   return result;
 }
@@ -406,7 +406,7 @@ SEXP decrypt_wrapper(SEXP data, SEXP private_key) {
   }
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
@@ -427,7 +427,7 @@ SEXP encrypt_c1c2c3_wrapper(SEXP data, SEXP public_key) {
   unsigned char* encrypt_data = encrypt_c1c2c3(data_raw, XLENGTH(data), public_key_c, &enc_len);
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, enc_len));
   memcpy(RAW(result), encrypt_data, enc_len);
-  free_char_array((char*)encrypt_data);
+  free_byte_array(encrypt_data, enc_len);
   UNPROTECT(1);
   return result;
 }
@@ -451,7 +451,7 @@ SEXP decrypt_c1c2c3_wrapper(SEXP data, SEXP private_key) {
   }
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
@@ -472,7 +472,7 @@ SEXP encrypt_asna1_wrapper(SEXP data, SEXP public_key) {
   unsigned char* encrypt_data = encrypt_asna1(data_raw, XLENGTH(data), public_key_c, &enc_len);
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, enc_len));
   memcpy(RAW(result), encrypt_data, enc_len);
-  free_char_array((char*)encrypt_data);
+  free_byte_array(encrypt_data, enc_len);
   UNPROTECT(1);
   return result;
 }
@@ -496,7 +496,7 @@ SEXP decrypt_asna1_wrapper(SEXP data, SEXP private_key) {
   }
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
@@ -541,7 +541,7 @@ SEXP decrypt_hex_wrapper(SEXP data, SEXP private_key) {
   }
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
@@ -589,7 +589,7 @@ SEXP decrypt_base64_wrapper(SEXP data, SEXP private_key) {
   }
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
@@ -640,7 +640,7 @@ SEXP decrypt_from_file_wrapper(SEXP dec_file, SEXP private_key) {
   unsigned char* decrypt_data = decrypt_from_file(dec_file_c, private_key_c, &dec_len);
   SEXP result = PROTECT(Rf_allocVector(RAWSXP, dec_len));
   memcpy(RAW(result), decrypt_data, dec_len);
-  free_char_array((char*)decrypt_data);
+  free_byte_array(decrypt_data, dec_len);
   UNPROTECT(1);
   return result;
 }
