@@ -1,5 +1,5 @@
 0.1.2
-- fix memory leaks detected by valgrind
+- Fix memory leaks detected by valgrind
 
 0.1.1
 - Initial release
