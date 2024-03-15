@@ -5,7 +5,6 @@ Authors of vendored cargo crates
  - cfg-if 1.0.0: Alex Crichton
  - getrandom 0.2.12: The Rand Project Developers
  - hex 0.4.3: KokaKiwi
- - lazy_static 1.4.0: Marvin Löbel
  - libc 0.2.153: The Rust Project Developers
  - num-bigint 0.4.4: The Rust Project Developers
  - num-integer 0.1.46: The Rust Project Developers
@@ -15,7 +14,8 @@ Authors of vendored cargo crates
  - rand 0.8.5: The Rand Project Developers, The Rust Project Developers
  - rand_chacha 0.3.1: The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors
  - rand_core 0.6.4: The Rand Project Developers, The Rust Project Developers
+ - smcrypto 0.2.1: yumeng
  - wasi 0.11.0+wasi-snapshot-preview1: The Cranelift Project Developers
  - yasna 0.5.2: Masaki Hara
 
-(This file was auto-generated from 'cargo metadata' on 2024-02-28)
+(This file was auto-generated from 'cargo metadata' on 2024-03-15)

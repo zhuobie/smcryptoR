@@ -1,5 +1,5 @@
 use crate::sm3::sm3_hash;
-use std::{collections::HashMap, vec};
+use std::vec;
 use num_bigint::BigUint;
 use num_traits::*;
 use num_integer::*;
@@ -7,46 +7,28 @@ use rand::seq::SliceRandom;
 use std::process::Command;
 use std::path::Path;
 use std::fs;
-use lazy_static::*;
 use std::borrow::Cow;
 use bytes::{BytesMut, BufMut};
 
-lazy_static! {
-    static ref ECC_TABLE: HashMap<&'static str, &'static str> = {
-        let mut ecc_table = HashMap::new();
-        ecc_table.insert("n", "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123");
-        ecc_table.insert("p", "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF");
-        ecc_table.insert("g", "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0");
-        ecc_table.insert("a", "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC");
-        ecc_table.insert("b", "28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93");
-        ecc_table
-    };
-    static ref PARA_LEN: usize = ECC_TABLE.get(&"n").unwrap().len();
-    static ref ECC_N: &'static str = ECC_TABLE.get(&"n").unwrap();
-    static ref ECC_P: &'static str = ECC_TABLE.get(&"p").unwrap();
-    static ref ECC_G: &'static str = ECC_TABLE.get(&"g").unwrap();
-    static ref ECC_A: &'static str = ECC_TABLE.get(&"a").unwrap();
-    static ref ECC_B: &'static str = ECC_TABLE.get(&"b").unwrap();
-
-    static ref ECC_A3: BigUint = {
-        let ecc_a: BigUint = BigUint::from_str_radix(*ECC_A, 16).unwrap();
-        let ecc_p: BigUint = BigUint::from_str_radix(*ECC_P, 16).unwrap();
-        (ecc_a + BigUint::new(vec![3])) % ecc_p
-    };
-}
+static PARA_LEN: usize = 64;
+static ECC_N: &str = "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123";
+static ECC_P: &str = "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF";
+static ECC_G: &str = "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0";
+static ECC_A: &str = "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC";
+static ECC_B: &str = "28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93";
 
 #[macro_export]
 macro_rules! format_hex {
     ($a: expr) => {
-        format!("{:0width$x}", $a, width = *PARA_LEN)
+        format!("{:0width$x}", $a, width = PARA_LEN)
     };
 
     ($a: expr, $b: expr) => {
-        format!("{:0width$x}{:0width$x}", $a, $b, width = *PARA_LEN)
+        format!("{:0width$x}{:0width$x}", $a, $b, width = PARA_LEN)
     };
 
     ($a: expr, $($b: tt)*) => {
-        format!("{:0width$x}{}", $a, format_hex!($($b)*), width = *PARA_LEN)
+        format!("{:0width$x}{}", $a, format_hex!($($b)*), width = PARA_LEN)
     }
 }
 
@@ -128,8 +110,8 @@ fn kdf(z: &[u8], klen: usize) -> Vec<u8> {
 
 fn pubkey2point(public_key: &str) -> Point {
     Point {
-        x: BigUint::from_str_radix(&public_key[0..*PARA_LEN], 16).unwrap(), 
-        y: BigUint::from_str_radix(&public_key[*PARA_LEN..], 16).unwrap(), 
+        x: BigUint::from_str_radix(&public_key[0..PARA_LEN], 16).unwrap(), 
+        y: BigUint::from_str_radix(&public_key[PARA_LEN..], 16).unwrap(), 
         z: BigUint::one()
     }
 }
@@ -143,7 +125,7 @@ struct Point {
 
 fn double_point(input: Point) -> Point {
     let (x1, y1, z1) = (input.x, input.y, input.z);
-    let ecc_p = BigUint::from_str_radix(*ECC_P, 16).unwrap();
+    let ecc_p = BigUint::from_str_radix(ECC_P, 16).unwrap();
     let t6 = (&z1 * &z1) % &ecc_p; 
     let t2 = (&y1 * &y1) % &ecc_p;
     let t3 = (&x1 + &t6) % &ecc_p;
@@ -154,7 +136,8 @@ fn double_point(input: Point) -> Point {
     let t5 = (&x1 * &t4) % &ecc_p;
     let t1 = (&t1 * BigUint::new(vec![3])) % &ecc_p;
     let t6 = (&t6 * &t6) % &ecc_p;
-    let t6 = (&*ECC_A3 * &t6) % &ecc_p;
+    let ecc_a3 = BigUint::new(vec![0]);
+    let t6 = (&ecc_a3 * &t6) % &ecc_p;
     let t1 = (&t1 + &t6) % &ecc_p;
     let z3 = (&t3 + &t3) % &ecc_p;
     let t3 = (&t1 * &t1) % &ecc_p;
@@ -179,7 +162,7 @@ fn double_point(input: Point) -> Point {
 fn add_point(p1: Point, p2: Point) -> Point {
     let (x1, y1, z1) = (p1.x, p1.y, p1.z);
     let (x2, y2) = (p2.x, p2.y);
-    let ecc_p: BigUint = BigUint::from_str_radix(*ECC_P, 16).unwrap();
+    let ecc_p: BigUint = BigUint::from_str_radix(ECC_P, 16).unwrap();
     let t1: BigUint = (&z1 * &z1) % &ecc_p;
     let t2: BigUint = (&y2 * &z1) % &ecc_p;
     let t3: BigUint = (&x2 * &t1) % &ecc_p;
@@ -206,7 +189,7 @@ fn add_point(p1: Point, p2: Point) -> Point {
 }
 
 fn convert_jacb_to_nor(point: Point) -> Point {
-    let ecc_p: BigUint = BigUint::from_str_radix(*ECC_P, 16).unwrap();
+    let ecc_p: BigUint = BigUint::from_str_radix(ECC_P, 16).unwrap();
     let (x, y, z) = (point.x, point.y, point.z);
     let z_1 = z.clone();
     let z_inv: BigUint = z.modpow(&(&ecc_p - BigUint::new(vec![2])), &ecc_p);
@@ -234,18 +217,18 @@ fn kg(k: BigUint, point: &str) -> Point {
     let mut k = k;
     let point: String = point.to_string() + "1";
     let point = Point {
-        x: BigUint::from_str_radix(&point[0..*PARA_LEN], 16).unwrap(),
-        y: BigUint::from_str_radix(&point[*PARA_LEN..(*PARA_LEN * 2)], 16).unwrap(), 
-        z: BigUint::from_str_radix(&point[(*PARA_LEN * 2)..], 16).unwrap()
+        x: BigUint::from_str_radix(&point[0..PARA_LEN], 16).unwrap(),
+        y: BigUint::from_str_radix(&point[PARA_LEN..(PARA_LEN * 2)], 16).unwrap(), 
+        z: BigUint::from_str_radix(&point[(PARA_LEN * 2)..], 16).unwrap()
     };
     let mut mask_str = "8".to_string();
-    for _ in 0..((*PARA_LEN) - 1) {
+    for _ in 0..((PARA_LEN) - 1) {
         mask_str += "0";
     }
     let mask: BigUint = BigUint::from_str_radix(&mask_str, 16).unwrap();
     let mut temp = point.clone();
     let mut flag = false;
-    for _ in 0..(*PARA_LEN * 4) {
+    for _ in 0..(PARA_LEN * 4) {
         if flag {
             temp = double_point(temp);
         } 
@@ -285,10 +268,10 @@ pub fn pubkey_valid(public_key: &str) -> bool {
     let y: &str = &public_key[64..128];
     let x = BigUint::from_str_radix(x, 16).unwrap();
     let y = BigUint::from_str_radix(y, 16).unwrap();
-    let a = BigUint::from_str_radix(*ECC_A, 16).unwrap();
-    let b = BigUint::from_str_radix(*ECC_B, 16).unwrap();
-    let p = BigUint::from_str_radix(*ECC_P, 16).unwrap();
-    let np0 = kg(BigUint::from_str_radix(*ECC_N, 16).unwrap(), &public_key) == Point {x: BigUint::zero(), y: BigUint::zero(), z: BigUint::zero()};
+    let a = BigUint::from_str_radix(ECC_A, 16).unwrap();
+    let b = BigUint::from_str_radix(ECC_B, 16).unwrap();
+    let p = BigUint::from_str_radix(ECC_P, 16).unwrap();
+    let np0 = kg(BigUint::from_str_radix(ECC_N, 16).unwrap(), &public_key) == Point {x: BigUint::zero(), y: BigUint::zero(), z: BigUint::zero()};
     let on_curve = (&y * &y) % &p == (&x * &x * &x + &a * &x + &b) % &p;
     np0 && on_curve
 }
@@ -420,8 +403,8 @@ pub fn gen_keypair_openssl() -> (String, String) {
 }
 
 pub fn gen_keypair() -> (String, String) {
-    let d = random_hex(*PARA_LEN);
-    let pa = kg(BigUint::from_str_radix(&d, 16).unwrap(), *ECC_G);
+    let d = random_hex(PARA_LEN);
+    let pa = kg(BigUint::from_str_radix(&d, 16).unwrap(), ECC_G);
     let pa = format_hex!(pa.x, pa.y);
     (d, pa)
 }
@@ -429,23 +412,23 @@ pub fn gen_keypair() -> (String, String) {
 /// Calculate public key from a private key.
 
 pub fn pk_from_sk(private_key: &str) -> String {
-    let p = kg(BigUint::from_str_radix(private_key, 16).unwrap(), *ECC_G);
+    let p = kg(BigUint::from_str_radix(private_key, 16).unwrap(), ECC_G);
     format_hex!(p.x, p.y)
 }
 
 fn sign_raw(data: &[u8], private_key: &str) -> Vec<u8> {
     let e = BigUint::from_bytes_be(data);
     let d = BigUint::from_str_radix(private_key, 16).unwrap();
-    let k = random_hex(*PARA_LEN);
+    let k = random_hex(PARA_LEN);
     let k = BigUint::from_str_radix(&k, 16).unwrap();
     let k1 = k.clone();
-    let p1 = kg(k, *ECC_G);
-    let r = (e + p1.x) % BigUint::from_str_radix(*ECC_N, 16).unwrap();
-    if r == BigUint::zero() || &r + &k1 == BigUint::from_str_radix(*ECC_N, 16).unwrap() {
+    let p1 = kg(k, ECC_G);
+    let r = (e + p1.x) % BigUint::from_str_radix(ECC_N, 16).unwrap();
+    if r == BigUint::zero() || &r + &k1 == BigUint::from_str_radix(ECC_N, 16).unwrap() {
         vec![]
     } else {
-        let d_1: BigUint = (&d + BigUint::one()).modpow(&(BigUint::from_str_radix(*ECC_N, 16).unwrap() - BigUint::new(vec![2])), &BigUint::from_str_radix(*ECC_N, 16).unwrap());
-        let s: BigUint = (&d_1 * (&k1 + &r) - &r) % BigUint::from_str_radix(*ECC_N, 16).unwrap();
+        let d_1: BigUint = (&d + BigUint::one()).modpow(&(BigUint::from_str_radix(ECC_N, 16).unwrap() - BigUint::new(vec![2])), &BigUint::from_str_radix(ECC_N, 16).unwrap());
+        let s: BigUint = (&d_1 * (&k1 + &r) - &r) % BigUint::from_str_radix(ECC_N, 16).unwrap();
         if s == BigUint::zero() {
             vec![]
     }   else {
@@ -481,12 +464,12 @@ fn verify_raw(data: &[u8], sign: &[u8], public_key: &str) -> bool {
     let r1 = r.clone();
     let s1 = s.clone();
     let e = BigUint::from_bytes_be(data);
-    let t = (r + s) % BigUint::from_str_radix(*ECC_N, 16).unwrap();
+    let t = (r + s) % BigUint::from_str_radix(ECC_N, 16).unwrap();
     let t1 = t.clone();
     if t == BigUint::zero() {
         false
     } else {
-        let mut p1 = kg(s1, *ECC_G);
+        let mut p1 = kg(s1, ECC_G);
         let p2 = kg(t1, public_key);
         if p1 == p2 {
             p1 = double_point(p1);
@@ -495,7 +478,7 @@ fn verify_raw(data: &[u8], sign: &[u8], public_key: &str) -> bool {
             p1 = convert_jacb_to_nor(p1);
         }
         let x = p1.x;
-        r1 == (&e + &x) % BigUint::from_str_radix(*ECC_N, 16).unwrap()
+        r1 == (&e + &x) % BigUint::from_str_radix(ECC_N, 16).unwrap()
     }
 }
 
@@ -525,16 +508,16 @@ fn verify_from_file(id: &[u8], data: &[u8], sign_file: &str, public_key: &str) -
 }
 
 fn encrypt(data: &[u8], public_key: &str) -> Vec<u8> {
-    let k = random_hex(*PARA_LEN);
-    let c1xyz = kg(BigUint::from_str_radix(k.as_str(), 16).unwrap(), *ECC_G);
-    let c1x = appendzero(&BigUint::to_bytes_be(&c1xyz.x), *PARA_LEN / 2);
-    let c1y = appendzero(&BigUint::to_bytes_be(&c1xyz.y), *PARA_LEN / 2);
+    let k = random_hex(PARA_LEN);
+    let c1xyz = kg(BigUint::from_str_radix(k.as_str(), 16).unwrap(), ECC_G);
+    let c1x = appendzero(&BigUint::to_bytes_be(&c1xyz.x), PARA_LEN / 2);
+    let c1y = appendzero(&BigUint::to_bytes_be(&c1xyz.y), PARA_LEN / 2);
     let c1 = concvec(&c1x, &c1y);
     let xy = kg(BigUint::from_str_radix(k.as_str(), 16).unwrap(), public_key);
     let x2 = BigUint::to_bytes_be(&xy.x);
     let y2 = BigUint::to_bytes_be(&xy.y);
-    let x2 = appendzero(&x2, *PARA_LEN / 2);
-    let y2 = appendzero(&y2, *PARA_LEN / 2);
+    let x2 = appendzero(&x2, PARA_LEN / 2);
+    let y2 = appendzero(&y2, PARA_LEN / 2);
     let xy = concvec(&x2, &y2);
     let t = kdf(&xy, data.len());    
     let cipher = if BigUint::from_bytes_be(&t) == BigUint::zero() {
@@ -662,9 +645,9 @@ fn zab(public_key: &str, uid: &[u8]) -> String {
     let za = concvec!(
         &vec![((entla >> 8) & 0xFF) as u8, (entla & 0xFF) as u8], 
         uid, 
-        &hex::decode(*ECC_A).unwrap(), 
-        &hex::decode(*ECC_B).unwrap(), 
-        &hex::decode(*ECC_G).unwrap(), 
+        &hex::decode(ECC_A).unwrap(), 
+        &hex::decode(ECC_B).unwrap(), 
+        &hex::decode(ECC_G).unwrap(), 
         &hex::decode(public_key).unwrap()
     );
     sm3_hash(&za)
@@ -679,7 +662,7 @@ fn keyexchange_raw(klen: usize, ida: &[u8], idb: &[u8], private_key: &str, publi
     let x2hat = kexhat(BigUint::from_str_radix(&pk_from_sk(r_private_key)[0..64], 16).unwrap());
     let x2rb = x2hat * BigUint::from_str_radix(r_private_key, 16).unwrap();
     let tbt = BigUint::from_str_radix(private_key, 16).unwrap() + x2rb;
-    let tb = tbt % BigUint::from_str_radix(*ECC_N, 16).unwrap();
+    let tb = tbt % BigUint::from_str_radix(ECC_N, 16).unwrap();
     assert_eq!(pubkey_valid(r_public_key), true);
     let x1hat = kexhat(BigUint::from_str_radix(&r_public_key[0..64], 16).unwrap());    
     let kx1y1 = kg(x1hat, &r_public_key);

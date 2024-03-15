@@ -1262,10 +1262,9 @@ pub extern  "C" fn free_struct_keypair(ptr: *mut Keypair) {
     unsafe {
         if !ptr.is_null() {
             let kp = &mut *ptr;
-            libc::free(kp.private_key as *mut libc::c_void);
-            libc::free(kp.public_key as *mut libc::c_void);
-            // drop(Box::from_raw(ptr));
-            libc::free(ptr as *mut libc::c_void);
+            drop(CString::from_raw(kp.private_key));
+            drop(CString::from_raw(kp.public_key));
+            drop(Box::from_raw(ptr));
         }
     }
 }
@@ -1276,8 +1275,8 @@ pub extern "C" fn free_struct_keyexchangedata(ptr: *mut KeyExchangeData) {
         if !ptr.is_null() {
             let kp = &mut *ptr;
             libc::free(kp.data as *mut libc::c_void);
-            libc::free(kp.private_key_r as *mut libc::c_void);
-            libc::free(ptr as *mut libc::c_void);
+            drop(CString::from_raw(kp.private_key_r));
+            drop(Box::from_raw(ptr));
         }
     }
 }
@@ -1287,9 +1286,9 @@ pub extern "C" fn free_struct_keyexchangeresult(ptr: *mut KeyExchangeResult) {
     unsafe {
         if !ptr.is_null() {
             let kp = &mut *ptr;
-            libc::free(kp.k as *mut libc::c_void);
+            drop(CString::from_raw(kp.k));
             libc::free(kp.s12 as *mut libc::c_void);
-            libc::free(ptr as *mut libc::c_void);
+            drop(Box::from_raw(ptr));
         }
     }
 }
