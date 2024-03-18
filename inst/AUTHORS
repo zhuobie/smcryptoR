@@ -18,4 +18,4 @@ Authors of vendored cargo crates
  - wasi 0.11.0+wasi-snapshot-preview1: The Cranelift Project Developers
  - yasna 0.5.2: Masaki Hara
 
-(This file was auto-generated from 'cargo metadata' on 2024-03-15)
+(This file was auto-generated from 'cargo metadata' on 2024-03-18)
