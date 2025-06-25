@@ -1,3 +1,6 @@
+0.1.3
+- Fix terminate R errors
+
 0.1.2
 - Fix memory leaks detected by valgrind
 
